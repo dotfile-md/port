@@ -15,6 +15,7 @@ export type PortProcess = {
 
 export type WebInfo = {
   reachable: boolean;
+  responseMs: number | null;
   status: number | null;
   statusText: string | null;
   title: string | null;
@@ -52,6 +53,7 @@ function inferRuntime(command: string | null, args: string | null) {
 function emptyWebInfo(port: number, error: string | null = null): WebInfo {
   return {
     reachable: false,
+    responseMs: null,
     status: null,
     statusText: null,
     title: null,
@@ -117,6 +119,7 @@ function canConnect(port: number, timeoutMs = 220): Promise<boolean> {
 async function inspectWeb(port: number): Promise<WebInfo> {
   const url = `http://127.0.0.1:${port}`;
   try {
+    const startedAt = Date.now();
     const response = await fetch(url, {
       signal: AbortSignal.timeout(900),
       redirect: "manual",
@@ -130,6 +133,7 @@ async function inspectWeb(port: number): Promise<WebInfo> {
     }
     return {
       reachable: true,
+      responseMs: Date.now() - startedAt,
       status: response.status,
       statusText: response.statusText,
       title,
