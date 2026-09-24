@@ -25,4 +25,11 @@ describe("scanPorts", () => {
     expect(results[0]?.port).toBe(1);
     expect(results[0]?.state).toBe("free");
   });
+
+  it("supports UDP scans on IPv6 loopback", async () => {
+    const results = await scanPorts([1], { protocol: "UDP", host: "::1" });
+    expect(results[0]?.protocol).toBe("UDP");
+    expect(results[0]?.address).toBe("::1");
+    expect(results[0]?.web.reachable).toBe(false);
+  });
 });

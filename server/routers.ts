@@ -27,12 +27,14 @@ export const appRouter = router({
           start: z.number().int().min(1).max(65535).optional(),
           end: z.number().int().min(1).max(65535).optional(),
           ports: z.array(z.number().int().min(1).max(65535)).max(256).optional(),
+          protocol: z.enum(["TCP", "UDP"]).default("TCP"),
+          host: z.enum(["127.0.0.1", "::1"]).default("127.0.0.1"),
         }),
       )
-      .query(({ input }) => scanPorts(buildPortList(input))),
+      .query(({ input }) => scanPorts(buildPortList(input), { protocol: input.protocol, host: input.host })),
     inspect: publicProcedure
-      .input(z.object({ port: z.number().int().min(1).max(65535) }))
-      .query(({ input }) => scanPorts([input.port]).then((results) => results[0])),
+      .input(z.object({ port: z.number().int().min(1).max(65535), protocol: z.enum(["TCP", "UDP"]).default("TCP"), host: z.enum(["127.0.0.1", "::1"]).default("127.0.0.1") }))
+      .query(({ input }) => scanPorts([input.port], { protocol: input.protocol, host: input.host }).then((results) => results[0])),
   }),
 
   // TODO: add feature routers here, e.g.
